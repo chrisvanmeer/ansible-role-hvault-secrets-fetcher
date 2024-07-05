@@ -1,0 +1,48 @@
+---
+# defaults file for ansible-role-hvault-secrets-fetcher
+
+# The address of the Vault server
+# ===============================
+hvault_secrets_fetcher_vault_address: http://127.0.0.1:8200
+
+# If TLS, validate certificates, leave this on in production
+# ==========================================================
+hvault_secrets_fetcher_vault_validate_certs: true
+
+# Supported: token, userpass and approle
+# =========================================
+hvault_secrets_fetcher_auth_method: approle
+
+# If other than the default auth method mount point
+# =================================================
+# hvault_secrets_fetcher_auth_method_mount_point: <custom path to auth method - optional>
+
+# Set token for token authentication
+# ==================================
+# hvault_secrets_fetcher_auth_token_token: <token>
+
+# Set username, password and auth method mount point for userpass
+# ===============================================================
+# hvault_secrets_fetcher_auth_userpass_username: <username>
+# hvault_secrets_fetcher_auth_userpass_password: <password>
+
+# Set role_id, secret_id and auth method mount point for approle
+# ==============================================================
+# hvault_secrets_fetcher_auth_approle_role_id: <role_id>
+# hvault_secrets_fetcher_auth_approle_secret_id: <secret_id>
+
+# Define this list with all the secrets you want retrieved
+# Supported secrets engines: kv1 and kv2
+# ========================================================
+# hvault_secrets_fetcher_list:
+#   - secrets_engine: (kv1|kv2) - required
+#     secrets_engine_mount_point: <name of the kv mount if not default - optional>
+#     secret_name: <name of the secret> - required
+#     secret_version: <for kv2, omit to retrieve latest version - optional>
+#     secret_key: <specifcy the name of the key of which you want the value> - required
+#     dst_path: <full linux path> - required
+#     dst_mode: <permissions in octal with leading zero - optional>
+#     dst_owner: <owner - optional>
+#     dst_group: <group - optional>
+#     dst_restore_selinux: (true|false) true restores SELinux context - optional
+#     dst_absent: (true|false) true removes file on disk - optional

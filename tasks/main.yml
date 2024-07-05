@@ -1,0 +1,12 @@
+---
+# tasks file for ansible-role-hvault-secrets-fetcher
+
+- name: Import assert.yml
+  ansible.builtin.import_tasks:
+    file: assert.yml
+  when: hvault_secrets_fetcher_list is defined
+
+- name: Import vault.yml
+  ansible.builtin.import_tasks:
+    file: vault.yml
+  when: hvault_secrets_fetcher_list is defined

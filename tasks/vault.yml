@@ -1,0 +1,99 @@
+---
+# tasks file for ansible-role-hvault-secrets-fetcher
+
+- name: Set facts
+  ansible.builtin.set_fact:
+    kv1_secrets: "{{ hvault_secrets_fetcher_list
+                  | selectattr('secrets_engine', 'equalto', 'kv1')
+                  | list }}"
+    kv2_secrets: "{{ hvault_secrets_fetcher_list
+                  | selectattr('secrets_engine', 'equalto', 'kv2')
+                  | list }}"
+    selinux_paths: "{{ hvault_secrets_fetcher_list
+                    | selectattr('dst_restore_selinux', 'defined')
+                    | selectattr('dst_restore_selinux', 'equalto', true)
+                    | map(attribute='dst_path')
+                    | map('dirname')
+                    | unique | list }}"
+
+- name: Handle KV1 secret
+  when: kv1_secrets | length > 0
+  delegate_to: localhost
+  community.hashi_vault.vault_kv1_get:
+    url: "{{ hvault_secrets_fetcher_vault_address }}"
+    auth_method: "{{ hvault_secrets_fetcher_auth_method }}"
+    token: "{{ hvault_secrets_fetcher_auth_token_token | default(omit) }}"
+    username: "{{ hvault_secrets_fetcher_auth_userpass_username | default(omit) }}"
+    password: "{{ hvault_secrets_fetcher_auth_userpass_password | default(omit) }}"
+    role_id: "{{ hvault_secrets_fetcher_auth_approle_role_id | default(omit) }}"
+    secret_id: "{{ hvault_secrets_fetcher_auth_approle_secret_id | default(omit) }}"
+    mount_point: "{{ hvault_secrets_fetcher_auth_method_mount_point | default(omit) }}"
+    validate_certs: "{{ hvault_secrets_fetcher_vault_validate_certs }}"
+    path: "{{ item.secret_name }}"
+    engine_mount_point: "{{ item.secrets_engine_mount_point | default(omit) }}"
+  loop: "{{ kv1_secrets }}"
+  loop_control:
+    label: "{{ item.secret_name }}"
+  register: kv1_results
+
+- name: Handle KV2 secrets
+  when: kv2_secrets | length > 0
+  delegate_to: localhost
+  community.hashi_vault.vault_kv2_get:
+    url: "{{ hvault_secrets_fetcher_vault_address }}"
+    auth_method: "{{ hvault_secrets_fetcher_auth_method }}"
+    token: "{{ hvault_secrets_fetcher_auth_token_token | default(omit) }}"
+    username: "{{ hvault_secrets_fetcher_auth_userpass_username | default(omit) }}"
+    password: "{{ hvault_secrets_fetcher_auth_userpass_password | default(omit) }}"
+    role_id: "{{ hvault_secrets_fetcher_auth_approle_role_id | default(omit) }}"
+    secret_id: "{{ hvault_secrets_fetcher_auth_approle_secret_id | default(omit) }}"
+    mount_point: "{{ hvault_secrets_fetcher_auth_method_mount_point | default(omit) }}"
+    validate_certs: "{{ hvault_secrets_fetcher_vault_validate_certs }}"
+    path: "{{ item.secret_name }}"
+    engine_mount_point: "{{ item.secrets_engine_mount_point | default(omit) }}"
+    version: "{{ item.secret_version | default(omit) }}"
+  loop: "{{ kv2_secrets }}"
+  loop_control:
+    label: "{{ item.secret_name }}"
+  register: kv2_results
+
+- name: Combine results of KV secrets
+  ansible.builtin.set_fact:
+    kv_results: "{{ kv1_results | combine(kv2_results, list_merge='append', recursive=true) }}"
+
+- name: Ensure secrets are written to disk
+  ansible.builtin.copy:
+    content: "{{ item.secret[item.item.secret_key] }}"
+    dest: "{{ item.item.dst_path }}"
+    force: true  # always overwrite
+    mode: "{{ item.item.dst_mode | default(omit) }}"
+    owner: "{{ item.item.dst_owner | default(omit) }}"
+    group: "{{ item.item.dst_group | default(omit) }}"
+  loop: "{{ kv_results.results }}"
+  loop_control:
+    label: "{{ item.item.dst_path }}"
+  when: not item.item.dst_absent | default(false)
+  become: true
+
+- name: Ensure secrets marked as absent are removed from disk
+  ansible.builtin.file:
+    dest: "{{ item.item.dst_path }}"
+    state: absent
+  loop: "{{ kv_results.results }}"
+  loop_control:
+    label: "{{ item.item.dst_path }}"
+  when: item.item.dst_absent | default(false)
+  become: true
+
+- name: Apply SELinux file context to filesystem
+  ansible.builtin.command:
+    cmd: restorecon -irv {{ item }}
+  register: restorecon_output
+  changed_when: "'relabeled' in restorecon_output.stdout.lower()"
+  loop: "{{ selinux_paths }}"
+  loop_control:
+    label: "{{ item }}"
+  become: true
+  when:
+    - selinux_paths | length > 0
+    - ansible_facts.distribution == 'RedHat'

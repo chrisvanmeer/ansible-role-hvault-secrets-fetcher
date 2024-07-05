@@ -1,0 +1,210 @@
+---
+# assert file for ansible-role-hvault-secrets-fetcher
+
+- name: assert | Test hvault_secrets_fetcher_vault_address
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_vault_address is defined
+      - hvault_secrets_fetcher_vault_address is match('^https?://[a-zA-Z0-9.-]+:[0-9]+$')
+    quiet: true
+
+- name: assert | Test hvault_secrets_fetcher_vault_validate_certs
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_vault_validate_certs is defined
+      - hvault_secrets_fetcher_vault_validate_certs is boolean
+    quiet: true
+
+- name: assert | Test hvault_secrets_fetcher_auth_method
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_method is defined
+      - hvault_secrets_fetcher_auth_method is string
+      - hvault_secrets_fetcher_auth_method in ['token', 'userpass', 'approle']
+    quiet: true
+
+- name: assert | Test hvault_secrets_fetcher_auth_method_mount_point
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_method_mount_point is string
+      - hvault_secrets_fetcher_auth_method_mount_point is not none
+    quiet: true
+  when:
+    - hvault_secrets_fetcher_auth_method_mount_point is defined
+
+- name: assert | Test hvault_secrets_fetcher_auth_token_token
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_token_token is string
+      - hvault_secrets_fetcher_auth_token_token is not none
+    quiet: true
+  when:
+    - hvault_secrets_fetcher_auth_method == "token"
+
+- name: assert | Test hvault_secrets_fetcher_auth_userpass_username
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_userpass_username is string
+      - hvault_secrets_fetcher_auth_userpass_username is not none
+    quiet: true
+  when:
+    - hvault_secrets_fetcher_auth_method == "userpass"
+
+- name: assert | Test hvault_secrets_fetcher_auth_userpass_password
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_userpass_password is string
+      - hvault_secrets_fetcher_auth_userpass_password is not none
+    quiet: true
+  when:
+    - hvault_secrets_fetcher_auth_method == "userpass"
+
+- name: assert | Test hvault_secrets_fetcher_auth_approle_role_id
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_approle_role_id is string
+      - hvault_secrets_fetcher_auth_approle_role_id is not none
+    quiet: true
+  when:
+    - hvault_secrets_fetcher_auth_method == "approle"
+
+- name: assert | Test hvault_secrets_fetcher_auth_approle_secret_id
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_auth_approle_secret_id is string
+      - hvault_secrets_fetcher_auth_approle_secret_id is not none
+    quiet: true
+  when:
+    - hvault_secrets_fetcher_auth_method == "approle"
+
+- name: assert | Test hvault_secrets_fetcher_list
+  ansible.builtin.assert:
+    that:
+      - hvault_secrets_fetcher_list is iterable
+    quiet: true
+
+- name: assert | Test item.secrets_engine
+  ansible.builtin.assert:
+    that:
+      - item.secrets_engine is defined
+      - item.secrets_engine is string
+      - item.secrets_engine in ['kv1', 'kv2']
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.secrets_engine }}"
+
+- name: assert | Test item.secrets_engine_mount_point
+  ansible.builtin.assert:
+    that:
+      - item.secrets_engine is defined
+      - item.secrets_engine is string
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.secrets_engine }}"
+  when:
+    - item.secrets_engine_mount_point is defined
+
+- name: assert | Test item.secret_name
+  ansible.builtin.assert:
+    that:
+      - item.secret_name is defined
+      - item.secret_name is string
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.secret_name }}"
+
+- name: assert | Test item.secret_version
+  ansible.builtin.assert:
+    that:
+      - item.secret_version >= 0
+      - item.secret_version <= 100
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.secret_name }}"
+  when:
+    - item.secret_version is defined
+    - item.secret_version is number
+
+- name: assert | Test item.secret_key
+  ansible.builtin.assert:
+    that:
+      - item.secret_key is defined
+      - item.secret_key is string
+      - item.secret_key is not match('^/.*')
+      - item.secret_key is not match('.*\/$')
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.secret_key }}"
+
+- name: assert | Test item.dst_path
+  ansible.builtin.assert:
+    that:
+      - item.dst_path is defined
+      - item.dst_path is string
+      - item.dst_path is match('^(\/[\w\-\.]+)+$')
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.dst_path }}"
+
+- name: assert | Test item.dst_mode
+  ansible.builtin.assert:
+    that:
+      - item.dst_mode is match('^(0|1|2)[0-7]{3}$')
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.dst_path }}"
+  when:
+    - item.dst_mode is defined
+
+- name: assert | Test item.dst_owner
+  ansible.builtin.assert:
+    that:
+      - item.dst_owner is string
+      - item.dst_owner is not none
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.dst_path }}"
+  when:
+    - item.dst_owner is defined
+
+- name: assert | Test item.dst_group
+  ansible.builtin.assert:
+    that:
+      - item.dst_group is string
+      - item.dst_group is not none
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.dst_path }}"
+  when:
+    - item.dst_group is defined
+
+- name: assert | Test item.dst_restore_selinux
+  ansible.builtin.assert:
+    that:
+      - item.dst_restore_selinux is boolean
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.dst_path }}"
+  when:
+    - item.dst_restore_selinux is defined
+
+- name: assert | Test item.dst_state
+  ansible.builtin.assert:
+    that:
+      - item.dst_state is boolean
+    quiet: true
+  loop: "{{ hvault_secrets_fetcher_list }}"
+  loop_control:
+    label: "{{ item.dst_path }}"
+  when:
+    - item.dst_state is defined
