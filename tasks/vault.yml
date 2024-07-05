@@ -63,26 +63,30 @@
 
 - name: Ensure secrets are written to disk
   ansible.builtin.copy:
-    content: "{{ item.secret[item.item.secret_key] }}"
-    dest: "{{ item.item.dst_path }}"
+    content: "{{ item.0.secret[item.1.secret_key] }}"
+    dest: "{{ item.1.dst_path }}"
     force: true  # always overwrite
-    mode: "{{ item.item.dst_mode | default(omit) }}"
-    owner: "{{ item.item.dst_owner | default(omit) }}"
-    group: "{{ item.item.dst_group | default(omit) }}"
-  loop: "{{ kv_results.results }}"
+    mode: "{{ item.1.dst_mode | default(omit) }}"
+    owner: "{{ item.1.dst_owner | default(omit) }}"
+    group: "{{ item.1.dst_group | default(omit) }}"
+  with_subelements:
+    - "{{ kv_results.results }}"
+    - item.secret_keys
   loop_control:
-    label: "{{ item.item.dst_path }}"
-  when: not item.item.dst_absent | default(false)
+    label: "{{ item.1.dst_path }}"
+  when: not item.1.dst_absent | default(false)
   become: true
 
 - name: Ensure secrets marked as absent are removed from disk
   ansible.builtin.file:
-    dest: "{{ item.item.dst_path }}"
+    dest: "{{ item.1.dst_path }}"
     state: absent
-  loop: "{{ kv_results.results }}"
+  with_subelements:
+    - "{{ kv_results.results }}"
+    - item.secret_keys
   loop_control:
-    label: "{{ item.item.dst_path }}"
-  when: item.item.dst_absent | default(false)
+    label: "{{ item.1.dst_path }}"
+  when: item.1.dst_absent | default(false)
   become: true
 
 - name: Apply SELinux file context to filesystem

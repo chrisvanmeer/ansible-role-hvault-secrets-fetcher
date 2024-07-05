@@ -129,82 +129,105 @@
     - item.secret_version is defined
     - item.secret_version is number
 
-- name: assert | Test item.secret_key
+- name: assert | Test secret_keys
   ansible.builtin.assert:
     that:
-      - item.secret_key is defined
-      - item.secret_key is string
-      - item.secret_key is not match('^/.*')
-      - item.secret_key is not match('.*\/$')
+      - item.secret_keys is iterable
     quiet: true
   loop: "{{ hvault_secrets_fetcher_list }}"
   loop_control:
-    label: "{{ item.secret_key }}"
+    label: "{{ item.secret_name }}"
+
+- name: assert | Test item.1.secret_key
+  ansible.builtin.assert:
+    that:
+      - item.1.secret_key is defined
+      - item.1.secret_key is string
+      - item.1.secret_key is not match('^/.*')
+      - item.1.secret_key is not match('.*\/$')
+    quiet: true
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
+  loop_control:
+    label: "{{ item.1.secret_key }}"
 
 - name: assert | Test item.dst_path
   ansible.builtin.assert:
     that:
-      - item.dst_path is defined
-      - item.dst_path is string
-      - item.dst_path is match('^(\/[\w\-\.]+)+$')
+      - item.1.dst_path is defined
+      - item.1.dst_path is string
+      - item.1.dst_path is match('^(\/[\w\-\.]+)+$')
     quiet: true
-  loop: "{{ hvault_secrets_fetcher_list }}"
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
   loop_control:
-    label: "{{ item.dst_path }}"
+    label: "{{ item.1.dst_path }}"
 
-- name: assert | Test item.dst_mode
+- name: assert | Test item.1.dst_mode
   ansible.builtin.assert:
     that:
-      - item.dst_mode is match('^(0|1|2)[0-7]{3}$')
+      - item.1.dst_mode is match('^(0|1|2)[0-7]{3}$')
     quiet: true
-  loop: "{{ hvault_secrets_fetcher_list }}"
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
   loop_control:
-    label: "{{ item.dst_path }}"
+    label: "{{ item.1.dst_path }}"
   when:
-    - item.dst_mode is defined
+    - item.1.dst_mode is defined
 
-- name: assert | Test item.dst_owner
+- name: assert | Test item.1.dst_owner
   ansible.builtin.assert:
     that:
-      - item.dst_owner is string
-      - item.dst_owner is not none
+      - item.1.dst_owner is string
+      - item.1.dst_owner is not none
     quiet: true
-  loop: "{{ hvault_secrets_fetcher_list }}"
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
   loop_control:
-    label: "{{ item.dst_path }}"
+    label: "{{ item.1.dst_path }}"
   when:
-    - item.dst_owner is defined
+    - item.1.dst_owner is defined
 
-- name: assert | Test item.dst_group
+- name: assert | Test item.1.dst_group
   ansible.builtin.assert:
     that:
-      - item.dst_group is string
-      - item.dst_group is not none
+      - item.1.dst_group is string
+      - item.1.dst_group is not none
     quiet: true
-  loop: "{{ hvault_secrets_fetcher_list }}"
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
   loop_control:
-    label: "{{ item.dst_path }}"
+    label: "{{ item.1.dst_path }}"
   when:
-    - item.dst_group is defined
+    - item.1.dst_group is defined
 
-- name: assert | Test item.dst_restore_selinux
+- name: assert | Test item.1.dst_restore_selinux
   ansible.builtin.assert:
     that:
-      - item.dst_restore_selinux is boolean
+      - item.1.dst_restore_selinux is boolean
     quiet: true
-  loop: "{{ hvault_secrets_fetcher_list }}"
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
   loop_control:
-    label: "{{ item.dst_path }}"
+    label: "{{ item.1.dst_path }}"
   when:
-    - item.dst_restore_selinux is defined
+    - item.1.dst_restore_selinux is defined
 
-- name: assert | Test item.dst_state
+- name: assert | Test item.1.dst_state
   ansible.builtin.assert:
     that:
-      - item.dst_state is boolean
+      - item.1.dst_state is boolean
     quiet: true
-  loop: "{{ hvault_secrets_fetcher_list }}"
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
   loop_control:
-    label: "{{ item.dst_path }}"
+    label: "{{ item.1.dst_path }}"
   when:
-    - item.dst_state is defined
+    - item.1.dst_state is defined

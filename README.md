@@ -70,22 +70,20 @@ Including an example of how to use your role (for instance, with variables passe
           secrets_engine_mount_point: tlscerts
           secret_name: webapp.domain.org
           secret_version: 3
-          secret_key: certificate
-          dst_path: /etc/pki/tls/certs/webapp.domain.org.pem
-          dst_mode: '0644'
-          dst_owner: root
-          dst_group: root
-          dst_restore_selinux: true
-        - secrets_engine: kv2
-          secrets_engine_mount_point: tlscerts
-          secret_version: 3
-          secret_name: webapp.domain.org
-          secret_key: private_key
-          dst_path: /etc/pki/tls/private/webapp.domain.org.key
-          dst_mode: '0600'
-          dst_owner: root
-          dst_group: root
-          dst_restore_selinux: true
+          secret_keys:
+            - secret_key: certificate
+              dst_path: /etc/pki/tls/certs/webapp.domain.org.pem
+              dst_mode: '0644'
+              dst_owner: root
+              dst_group: root
+              dst_restore_selinux: true
+            - secret_name: webapp.domain.org
+              secret_key: private_key
+              dst_path: /etc/pki/tls/private/webapp.domain.org.key
+              dst_mode: '0600'
+              dst_owner: root
+              dst_group: root
+              dst_restore_selinux: true
 ```
 
 License

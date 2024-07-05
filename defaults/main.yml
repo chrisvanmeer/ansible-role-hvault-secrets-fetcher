@@ -39,10 +39,11 @@ hvault_secrets_fetcher_auth_method: approle
 #     secrets_engine_mount_point: <name of the kv mount if not default - optional>
 #     secret_name: <name of the secret> - required
 #     secret_version: <for kv2, omit to retrieve latest version - optional>
-#     secret_key: <specifcy the name of the key of which you want the value> - required
-#     dst_path: <full linux path> - required
-#     dst_mode: <permissions in octal with leading zero - optional>
-#     dst_owner: <owner - optional>
-#     dst_group: <group - optional>
-#     dst_restore_selinux: (true|false) true restores SELinux context - optional
-#     dst_absent: (true|false) true removes file on disk - optional
+#     secret_keys:
+#       - secret_key: <specifcy the name of the key of which you want the value> - required
+#         dst_path: <full linux path> - required
+#         dst_mode: <permissions in octal with leading zero - optional>
+#         dst_owner: <owner - optional>
+#         dst_group: <group - optional>
+#         dst_restore_selinux: (true|false) true restores SELinux context - optional
+#         dst_absent: (true|false) true removes file on disk - optional
