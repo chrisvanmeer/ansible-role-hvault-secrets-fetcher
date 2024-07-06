@@ -76,6 +76,7 @@ Including an example of how to use your role (for instance, with variables passe
               dst_mode: '0644'
               dst_owner: root
               dst_group: root
+              dst_replace_file: false
               dst_restore_selinux: true
             - secret_name: webapp.domain.org
               secret_key: private_key
@@ -83,6 +84,7 @@ Including an example of how to use your role (for instance, with variables passe
               dst_mode: '0600'
               dst_owner: root
               dst_group: root
+              dst_replace_file: false
               dst_restore_selinux: true
 ```
 

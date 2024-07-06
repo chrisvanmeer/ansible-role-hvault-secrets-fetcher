@@ -219,6 +219,19 @@
   when:
     - item.1.dst_restore_selinux is defined
 
+- name: assert | Test item.1.dst_replace_file
+  ansible.builtin.assert:
+    that:
+      - item.1.dst_replace_file is boolean
+    quiet: true
+  with_subelements:
+    - "{{ hvault_secrets_fetcher_list }}"
+    - secret_keys
+  loop_control:
+    label: "{{ item.1.dst_path }}"
+  when:
+    - item.1.dst_replace_file is defined
+
 - name: assert | Test item.1.dst_state
   ansible.builtin.assert:
     that:

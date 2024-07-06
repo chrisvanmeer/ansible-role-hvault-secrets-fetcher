@@ -46,4 +46,5 @@ hvault_secrets_fetcher_auth_method: approle
 #         dst_owner: <owner - optional>
 #         dst_group: <group - optional>
 #         dst_restore_selinux: (true|false) true restores SELinux context - optional
+#         dst_replace_file: (true|false) false does not replace the file (default = true) - optional
 #         dst_absent: (true|false) true removes file on disk - optional

@@ -4,11 +4,11 @@
 - name: Set facts
   ansible.builtin.set_fact:
     kv1_secrets: "{{ hvault_secrets_fetcher_list
-                  | selectattr('secrets_engine', 'equalto', 'kv1')
-                  | list }}"
+                    | selectattr('secrets_engine', 'equalto', 'kv1')
+                    | list }}"
     kv2_secrets: "{{ hvault_secrets_fetcher_list
-                  | selectattr('secrets_engine', 'equalto', 'kv2')
-                  | list }}"
+                    | selectattr('secrets_engine', 'equalto', 'kv2')
+                    | list }}"
     selinux_paths: "{{ hvault_secrets_fetcher_list
                     | selectattr('dst_restore_selinux', 'defined')
                     | selectattr('dst_restore_selinux', 'equalto', true)
@@ -57,18 +57,18 @@
     label: "{{ item.secret_name }}"
   register: kv2_results
 
-- name: Combine results of KV secrets
+- name: Combine KV results
   ansible.builtin.set_fact:
     kv_results: "{{ kv1_results | combine(kv2_results, list_merge='append', recursive=true) }}"
 
 - name: Ensure secrets are written to disk
   ansible.builtin.copy:
-    content: "{{ item.0.secret[item.1.secret_key] }}"
+    content: "{{ item.0.secret[item.1.secret_key] + '\n' }}"
     dest: "{{ item.1.dst_path }}"
-    force: true  # always overwrite
     mode: "{{ item.1.dst_mode | default(omit) }}"
     owner: "{{ item.1.dst_owner | default(omit) }}"
     group: "{{ item.1.dst_group | default(omit) }}"
+    force: "{{ item.1.dst_replace_file | default(true) }}"
   with_subelements:
     - "{{ kv_results.results }}"
     - item.secret_keys
@@ -89,11 +89,12 @@
   when: item.1.dst_absent | default(false)
   become: true
 
-- name: Apply SELinux file context to filesystem
+- name: Apply SELinux context to filesystem
   ansible.builtin.command:
     cmd: restorecon -irv {{ item }}
   register: restorecon_output
   changed_when: "'relabeled' in restorecon_output.stdout.lower()"
+  failed_when: restorecon_output.rc != 0
   loop: "{{ selinux_paths }}"
   loop_control:
     label: "{{ item }}"
