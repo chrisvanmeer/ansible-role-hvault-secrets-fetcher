@@ -35,7 +35,7 @@
 - name: assert | Test hvault_secrets_fetcher_auth_token_token
   ansible.builtin.assert:
     that:
-      - hvault_secrets_fetcher_auth_token_token is string
+      - hvault_secrets_fetcher_auth_token_token is vault_encrypted
       - hvault_secrets_fetcher_auth_token_token is not none
     quiet: true
   when:
@@ -53,7 +53,7 @@
 - name: assert | Test hvault_secrets_fetcher_auth_userpass_password
   ansible.builtin.assert:
     that:
-      - hvault_secrets_fetcher_auth_userpass_password is string
+      - hvault_secrets_fetcher_auth_userpass_password is vault_encrypted
       - hvault_secrets_fetcher_auth_userpass_password is not none
     quiet: true
   when:
@@ -71,7 +71,7 @@
 - name: assert | Test hvault_secrets_fetcher_auth_approle_secret_id
   ansible.builtin.assert:
     that:
-      - hvault_secrets_fetcher_auth_approle_secret_id is string
+      - hvault_secrets_fetcher_auth_approle_secret_id is vault_encrypted
       - hvault_secrets_fetcher_auth_approle_secret_id is not none
     quiet: true
   when:
