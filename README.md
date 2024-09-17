@@ -78,8 +78,7 @@ Including an example of how to use your role (for instance, with variables passe
               dst_group: root
               dst_replace_file: false
               dst_restore_selinux: true
-            - secret_name: webapp.domain.org
-              secret_key: private_key
+            - secret_key: privatekey
               dst_path: /etc/pki/tls/private/webapp.domain.org.key
               dst_mode: '0600'
               dst_owner: root
