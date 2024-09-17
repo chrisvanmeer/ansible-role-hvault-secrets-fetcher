@@ -4,21 +4,22 @@
 - name: Set facts
   ansible.builtin.set_fact:
     kv1_secrets: "{{ hvault_secrets_fetcher_list
-                    | selectattr('secrets_engine', 'equalto', 'kv1')
-                    | list }}"
+      | selectattr('secrets_engine', 'equalto', 'kv1')
+      | list }}"
     kv2_secrets: "{{ hvault_secrets_fetcher_list
-                    | selectattr('secrets_engine', 'equalto', 'kv2')
-                    | list }}"
+      | selectattr('secrets_engine', 'equalto', 'kv2')
+      | list }}"
     selinux_paths: "{{ hvault_secrets_fetcher_list
-                    | selectattr('dst_restore_selinux', 'defined')
-                    | selectattr('dst_restore_selinux', 'equalto', true)
-                    | map(attribute='dst_path')
-                    | map('dirname')
-                    | unique | list }}"
+      | selectattr('dst_restore_selinux', 'defined')
+      | selectattr('dst_restore_selinux', 'equalto', true)
+      | map(attribute='dst_path')
+      | map('dirname')
+      | unique | list }}"
 
 - name: Handle KV1 secret
   when: kv1_secrets | length > 0
   delegate_to: localhost
+  become: false
   community.hashi_vault.vault_kv1_get:
     url: "{{ hvault_secrets_fetcher_vault_address }}"
     auth_method: "{{ hvault_secrets_fetcher_auth_method }}"
@@ -39,6 +40,7 @@
 - name: Handle KV2 secrets
   when: kv2_secrets | length > 0
   delegate_to: localhost
+  become: false
   community.hashi_vault.vault_kv2_get:
     url: "{{ hvault_secrets_fetcher_vault_address }}"
     auth_method: "{{ hvault_secrets_fetcher_auth_method }}"
