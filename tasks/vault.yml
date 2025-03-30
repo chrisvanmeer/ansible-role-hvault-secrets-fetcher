@@ -63,6 +63,58 @@
   ansible.builtin.set_fact:
     kv_results: "{{ kv1_results | combine(kv2_results, list_merge='append', recursive=true) }}"
 
+- name: Test key info
+  block:
+    - name: Test private key(s)
+      community.crypto.openssl_privatekey_info:
+        content: "{{ item.0.secret[item.1.secret_key] }}"
+      with_subelements:
+        - "{{ kv_results.results }}"
+        - item.secret_keys
+      loop_control:
+        label: "{{ item.1.dst_path }}"
+      register: key_info
+      no_log: true
+      when: "'PRIVATE' in item.0.secret[item.1.secret_key]"
+  rescue:
+    - name: Fail with error
+      ansible.builtin.debug:
+        msg: >
+          The private key for '{{ item.item[0].item.secret_name }}' failed.
+          Please check that the contents are valid.
+      loop: "{{ ansible_failed_result.results }}"
+      when: item.msg is defined
+      loop_control:
+        label: "{{ item.item[0].item.secret_name }}"
+    - name: Abort play
+      ansible.builtin.meta: end_play
+
+- name: Test certificate info
+  block:
+    - name: Test certificate(s)
+      community.crypto.x509_certificate_info:
+        content: "{{ item.0.secret[item.1.secret_key] }}"
+      with_subelements:
+        - "{{ kv_results.results }}"
+        - item.secret_keys
+      loop_control:
+        label: "{{ item.1.dst_path }}"
+      register: cert_info
+      no_log: true
+      when: "'CERTIFICATE' in item.0.secret[item.1.secret_key]"
+  rescue:
+    - name: Fail with error
+      ansible.builtin.debug:
+        msg: >
+          The certificate for '{{ item.item[0].item.secret_name }}'
+          failed with the following error: {{ item.msg }}
+      loop: "{{ ansible_failed_result.results }}"
+      when: item.msg is defined
+      loop_control:
+        label: "{{ item.item[0].item.secret_name }}"
+    - name: Abort play
+      ansible.builtin.meta: end_play
+
 - name: Ensure secrets are written to disk
   ansible.builtin.copy:
     content: "{{ item.0.secret[item.1.secret_key] + '\n' }}"
