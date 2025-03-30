@@ -40,6 +40,7 @@
     quiet: true
   when:
     - hvault_secrets_fetcher_auth_method == "token"
+    - not hvault_secrets_fetcher_debug | default(false)
 
 - name: assert | Test hvault_secrets_fetcher_auth_userpass_username
   ansible.builtin.assert:
@@ -58,6 +59,7 @@
     quiet: true
   when:
     - hvault_secrets_fetcher_auth_method == "userpass"
+    - not hvault_secrets_fetcher_debug | default(false)
 
 - name: assert | Test hvault_secrets_fetcher_auth_approle_role_id
   ansible.builtin.assert:
@@ -76,6 +78,7 @@
     quiet: true
   when:
     - hvault_secrets_fetcher_auth_method == "approle"
+    - not hvault_secrets_fetcher_debug | default(false)
 
 - name: assert | Test hvault_secrets_fetcher_list
   ansible.builtin.assert:
