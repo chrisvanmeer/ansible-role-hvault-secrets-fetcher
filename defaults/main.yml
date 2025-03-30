@@ -9,7 +9,7 @@ hvault_secrets_fetcher_vault_address: http://127.0.0.1:8200
 # ==========================================================
 hvault_secrets_fetcher_vault_validate_certs: true
 
-# Debug, if set to true, once circomvents the check for ansible-vault encrypted variables, defaults to false
+# Debug, if set to true, once circumvent the check for ansible-vault encrypted variables, defaults to false
 # ==========================================================================================================
 # hvault_secrets_fetcher_auth_method: false
 
