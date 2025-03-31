@@ -9,6 +9,7 @@ Requirements
 
 Ansible collections:
 
+- `community.crypto`
 - `community.hashi_vault`
 
 Python modules:
