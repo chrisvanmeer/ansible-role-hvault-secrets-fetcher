@@ -75,7 +75,7 @@
         label: "{{ item.1.dst_path }}"
       register: key_info
       no_log: true
-      when: "'PRIVATE' in item.0.secret[item.1.secret_key]"
+      when: "'BEGIN PRIVATE KEY' in item.0.secret[item.1.secret_key]"
   rescue:
     - name: Fail with error
       ansible.builtin.debug:
@@ -101,7 +101,7 @@
         label: "{{ item.1.dst_path }}"
       register: cert_info
       no_log: true
-      when: "'CERTIFICATE' in item.0.secret[item.1.secret_key]"
+      when: "'BEGIN CERTIFICATE' in item.0.secret[item.1.secret_key]"
   rescue:
     - name: Fail with error
       ansible.builtin.debug:
