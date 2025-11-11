@@ -155,4 +155,4 @@
   become: true
   when:
     - selinux_paths | length > 0
-    - ansible_facts.distribution == 'RedHat'
+    - ansible_os_family == 'RedHat'
