@@ -115,6 +115,23 @@
     - name: Abort play
       ansible.builtin.meta: end_play
 
+- name: Ensure directory creation
+  ansible.builtin.file:
+    path: "{{ item.1.dst_path | dirname }}"
+    state: directory
+    mode: "{{ item.1.dst_dir_mode | default(omit) }}"
+    owner: "{{ item.1.dst_dir_owner | default(omit) }}"
+    group: "{{ item.1.dst_dir_group | default(omit) }}"
+  with_subelements:
+    - "{{ kv_results.results }}"
+    - item.secret_keys
+  loop_control:
+    label: "{{ item.1.dst_path }}"
+  when:
+    - item.1.dst_dir_create | default(false)
+    - (item.1.dst_path | dirname) != '/'
+  become: true
+
 - name: Ensure secrets are written to disk
   ansible.builtin.copy:
     content: "{{ item.0.secret[item.1.secret_key] + '\n' }}"

@@ -52,3 +52,7 @@ hvault_secrets_fetcher_auth_method: approle
 #         dst_restore_selinux: (true|false) true restores SELinux context - optional
 #         dst_replace_file: (true|false) false does not replace the file (default = true) - optional
 #         dst_absent: (true|false) true removes file on disk - optional
+#         dst_dir_create: (true|false) true creates the path up to the secret (default = false) - optional
+#         dst_dir_mode: <directory permissions in octal with leading zero - optional> optional
+#         dst_dir_owner: <directory owner - optional>
+#         dst_dir_group: <directory group - optional>
